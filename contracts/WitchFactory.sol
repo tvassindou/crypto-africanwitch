@@ -15,8 +15,13 @@ contract WitchFactory {
 
     Witch[] public witches;
 
-    function _createWitch(string _name, uint _dna) private {
+    mapping (uint => address) public witchToOwner;
+    mapping (address => uint) ownerWitchCount;
+
+    function _createWitch(string _name, uint _dna) internal {
         uint id = witches.push(Witch(_name, _dna)) - 1;
+        witchToOwner[id] = msg.sender;
+        ownerWitchCount[msg.sender]++;
         NewWitch(id, _name, _dna);
     }
 
@@ -26,7 +31,9 @@ contract WitchFactory {
     }
 
     function createRandomWitch(string _name) public {
+        require(ownerWitchCount[msg.sender] == 0);
         uint randDna = _generateRandomDna(_name);
+        randDna = randDna - randDna % 100;
         _createWitch(_name, randDna);
     }
 
